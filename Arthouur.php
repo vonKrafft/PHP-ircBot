@@ -98,6 +98,11 @@ class Arthouur extends IRCBot
     {
         $this->log($message);
 
+        // special command when user send "c'est pas faux"
+        if (preg_match('/^c\'est pas faux/i', $message->get_content())) {
+            $message->set_content('!perceval');
+        }
+
         // Process command if necessary
         if (preg_match('/^!/', $message->get_content())) {
             $cmd = new IRCCommand($message, $this->history($message->get_source()));
