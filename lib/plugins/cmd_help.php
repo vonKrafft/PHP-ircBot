@@ -80,6 +80,9 @@ $commands_list = array(
         $__format_help__('quote', 'NAME', 'Affiche une citation aléatoire de Kaamelott parmi les dialogues du personnage précisé en argument'),
         $__format_help__('quote', '[NAME] WORD [WORD...]', 'Recherche une citation de Kaamelott en se basant sur les mots précisés en argument'),
     ),
+    'apero' => array(
+        $__format_help__('apero', '', 'Pour savoir si c\'est l\'heure de l\'apéro'),
+    ),
 );
 
 // Help
