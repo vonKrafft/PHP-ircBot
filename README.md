@@ -15,18 +15,18 @@ $ cd PHP-ircBot
 
 ## Usage
 
-You can edit the main script `MyAwesomeBot.php` or copy it to keep an original version. The bot is ready to use, simply set your own configuration at the end of `MyAwesomeBot.php`.
+You can edit the main script `MyAwesomeBot.php` or copy it to keep an original version. The bot is ready to use, simply set your own configuration at the beginning of `MyAwesomeBot.php`.
 
 ```php
-$admin = ''; // The administrator's nickname, case sensitive (leave empty to not use the admin restrictions)
-$bot = new MyAwesomeBot($admin, array(
-    'server'   => 'chat.freenode.net',  // Hostname of the IRC server
-    'port'     => 6667,                 // Remote port of the IRC server
-    'channels' => array(),              // List of IRC channel for auto-join
-    'nickname' => 'MyAwesomeNickname',  // Bot nickname
-    'realname' => 'MyAwesomeBot',       // Bot name (nickname is used if empty)
-    'version'  => '1.0.0',              // Version of the bot
-));
+define('ADM_NICKNAME', ''); // The administrator's nickname (leave empty to not use the admin restrictions)
+
+define('IRC_SERVER', 'chat.freenode.net');      // Hostname of the IRC server
+define('IRC_PORT', 6667);                       // Remote port of the IRC server
+define('IRC_CHANNELS' array());                 // List of IRC channel for auto-join
+
+define('BOT_NICKNAME', 'MyAwesomeNickname');    // Bot nickname
+define('BOT_REALNAME', 'MyAwesomeBot');         // Bot name (nickname is used if empty)
+define('BOT_VERSION', '1.0.0');                 // Version of the bot
 ```
 
 To start the IRC bot, simply run:
