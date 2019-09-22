@@ -3,4 +3,5 @@
 # Except this file and some directories
 !/log/
 !/quotes/
+!/ctf/
 !.gitignore
