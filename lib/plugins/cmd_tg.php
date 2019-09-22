@@ -44,7 +44,7 @@ if ($debug === true) {
 }
 
 // Immunity
-$immunity = array('kingarthur');
+$immunity = array(strtolower(BOT_NICKNAME), strtolower(ADM_NICKNAME));
 
 // Kick the requested nickname
 if(($sender !== $source) and ! in_array(strtolower($victim), $immunity)) {
@@ -53,7 +53,7 @@ if(($sender !== $source) and ! in_array(strtolower($victim), $immunity)) {
     $pattern .= (new DateTime())->sub(new DateInterval('PT119S'))->format('H:i') . ')';
     $pattern .= ':[0-9]{2}\] <<< .*' . $victim . '.* PRIVMSG ' . $source . ' :/i';
 
-    $flood_level = count(preg_grep($pattern, file(ROOT_DIR . '/var/log/kingarthur_' . date('y\wW') . '.log')));
+    $flood_level = count(preg_grep($pattern, file(ROOT_DIR . '/var/log/'. strtolower(BOT_NICKNAME) . '_' . date('y\wW') . '.log')));
 
     if ($debug === true) {
         printf('[DEBUG] Flood level: %d (%s)' . PHP_EOL, $flood_level, $pattern);

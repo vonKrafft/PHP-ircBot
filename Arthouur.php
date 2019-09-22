@@ -19,6 +19,20 @@
  *
  */
 
+############################## EDIT CONFIG HERE ##############################
+
+define('ADM_NICKNAME', ''); // The administrator's nickname (leave empty to not use the admin restrictions)
+
+define('IRC_SERVER', 'chat.freenode.net');      // Hostname of the IRC server
+define('IRC_PORT', 6667);                       // Remote port of the IRC server
+define('IRC_CHANNELS', array());                // List of IRC channel for auto-join
+
+define('BOT_NICKNAME', 'KingArthur');           // Bot nickname
+define('BOT_REALNAME', 'Le-Roi-Arthur');        // Bot name (nickname is used if empty)
+define('BOT_VERSION', '1.2.1');                 // Version of the bot
+
+############ DON'T EDIT CODE BELLOW IF YOU DON'T KNOW WHAT YOU DO ############
+
 // So the bot doesn't stop.
 set_time_limit(0);
 error_reporting(E_ALL);
@@ -191,14 +205,13 @@ class Arthouur extends IRCBot
 }
 
 // Create the bot
-$admin = ''; // The administrator's nickname, case sensitive (leave empty to not use the admin restrictions)
-$bot = new Arthouur($admin, array(
-    'server'   => 'chat.freenode.net',  // Hostname of the IRC server
-    'port'     => 6667,                 // Remote port of the IRC server
-    'channels' => array(),              // List of IRC channel for auto-join
-    'nickname' => 'KingArthur',         // Bot nickname
-    'realname' => 'Le-Roi-Arthur',      // Bot name (nickname is used if empty)
-    'version'  => '1.0.0',              // Version of the bot
+$bot = new Arthouur(ADM_NICKNAME, array(
+    'server'   => IRC_SERVER,
+    'port'     => IRC_PORT,
+    'channels' => IRC_CHANNELS,
+    'nickname' => BOT_NICKNAME,
+    'realname' => BOT_REALNAME,
+    'version'  => BOT_VERSION,
 ));
 
 // Loop
