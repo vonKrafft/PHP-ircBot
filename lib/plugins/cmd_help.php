@@ -83,6 +83,9 @@ $commands_list = array(
     'apero' => array(
         $__format_help__('apero', '', 'Pour savoir si c\'est l\'heure de l\'apéro'),
     ),
+    'weekend' => array(
+        $__format_help__('weekend', '', 'Pour savoir si c\'est l\'heure du week-end'),
+    ),
 );
 
 // Help
