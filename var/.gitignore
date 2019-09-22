@@ -1,5 +1,6 @@
 # Ignore everything in this directory
-*
-# Except this file and log directory
-!log
+/*
+# Except this file and some directories
+!/log/
+!/quotes/
 !.gitignore

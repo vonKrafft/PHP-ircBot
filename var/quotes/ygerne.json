@@ -1,0 +1,42 @@
+[
+    {
+        "content": "Vulgaire\u00a0? Oui... Mais pas seulement.",
+        "author": "Ygerne",
+        "actor": "Jos\u00e9e Drevon",
+        "saison": "Livre I",
+        "episode": "La Visite d'Ygerne",
+        "slug": "vulgaire-oui-mais-pas-seulement"
+    },
+    {
+        "content": "Au cas o\u00f9 il aurait une petite \"faim-faim\"!?",
+        "author": "Ygerne",
+        "actor": "Jos\u00e9e Drevon",
+        "saison": "Livre I",
+        "episode": "La Visite d'Ygerne",
+        "slug": "-cas-aurait-une-petite-faimfaim-"
+    },
+    {
+        "content": "D\u00eetes tout de suite que vous avez honte de votre \u00e9ducation.",
+        "author": "Ygerne",
+        "actor": "Jos\u00e9e Drevon",
+        "saison": "Livre II",
+        "episode": "Le secret d\u2019Arthur",
+        "slug": "dites-tout-suite-que-vous-avez-honte-votre-education"
+    },
+    {
+        "content": "Mais je vous emp\u00eache pas de faire la guerre, mais vous la ferez gu\u00e9ri\u00a0!",
+        "author": "Ygerne",
+        "actor": "Jos\u00e9e Drevon",
+        "saison": "Livre II",
+        "episode": "Mater Dixit",
+        "slug": "mais-vous-empeche-pas-faire-guerre-mais-vous-ferez-gueri"
+    },
+    {
+        "content": "Vous \u00eates des porcs\u00a0!",
+        "author": "Ygerne",
+        "actor": "Jos\u00e9e Drevon",
+        "saison": "Livre V",
+        "episode": "Anton",
+        "slug": "vous-etes-des-porcs"
+    }
+]
