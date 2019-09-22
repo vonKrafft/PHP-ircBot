@@ -51,10 +51,10 @@ require_once(ROOT_DIR . '/lib/classes/IRCClient.php');
 require_once(ROOT_DIR . '/lib/classes/IRCBot.php');
 
 /**
- * MyAwesomeBot
+ * Arthouur
  * @author vonKrafft <wandrille@vonkrafft.fr>
  */
-class MyAwesomeBot extends IRCBot
+class Arthouur extends IRCBot
 {
     /**
      * Construct item, opens the server connection, logs the bot in.
@@ -187,12 +187,12 @@ class MyAwesomeBot extends IRCBot
 
 // Create the bot
 $admin = ''; // The administrator's nickname, case sensitive (leave empty to not use the admin restrictions)
-$bot = new MyAwesomeBot($admin, array(
+$bot = new Arthouur($admin, array(
     'server'   => 'chat.freenode.net',  // Hostname of the IRC server
     'port'     => 6667,                 // Remote port of the IRC server
     'channels' => array(),              // List of IRC channel for auto-join
-    'nickname' => 'MyAwesomeNickname',  // Bot nickname
-    'realname' => 'MyAwesomeBot',       // Bot name (nickname is used if empty)
+    'nickname' => 'KingArthur',         // Bot nickname
+    'realname' => 'Le-Roi-Arthur',      // Bot name (nickname is used if empty)
     'version'  => '1.0.0',              // Version of the bot
 ));
 
