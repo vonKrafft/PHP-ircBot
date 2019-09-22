@@ -86,6 +86,9 @@ $commands_list = array(
     'weekend' => array(
         $__format_help__('weekend', '', 'Pour savoir si c\'est l\'heure du week-end'),
     ),
+    'madame' => array(
+        $__format_help__('madame', '', '[NSFW] Donne un lien aléatoire vers une image du site "Bonjour Madame"'),
+    ),
 );
 
 // Help
