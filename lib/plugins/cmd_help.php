@@ -95,6 +95,13 @@ $commands_list = array(
     'tg' => array(
         $__format_help__('tg', 'VICTIM', 'Kick la victime si celle-ci a envoyé 7 messages ou plus lors des 2 dernières minutes'),
     ),
+    'wisdom' => array(
+        $__format_help__('wisdom', '', 'Choisir une sage parole aléatoirement'),
+        $__format_help__('wisdom', 'search WORD [WORD...]', 'Recherche une sage parole sur la base d\'un ou plusieurs mots'),
+        $__format_help__('wisdom', 'get ID', 'Affiche la citation correspondant à l\'ID placé en argument'),
+        $__format_help__('wisdom', 'add QUOTE', 'Ajoute une parole au grand livre de la sagesse (les noms peuvent être précisés entre chevrons)'),
+        $__format_help__('wisdom', 'del ID', 'Supprime la citation correspondant à l\'ID placé en argument'),
+    ),
 );
 
 // Help
