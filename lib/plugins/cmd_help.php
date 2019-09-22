@@ -89,6 +89,9 @@ $commands_list = array(
     'madame' => array(
         $__format_help__('madame', '', '[NSFW] Donne un lien aléatoire vers une image du site "Bonjour Madame"'),
     ),
+    'cafe' => array(
+        $__format_help__('cafe', '', 'Demande à Arthur de faire le café'),
+    ),
 );
 
 // Help
