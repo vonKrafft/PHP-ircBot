@@ -92,6 +92,9 @@ $commands_list = array(
     'cafe' => array(
         $__format_help__('cafe', '', 'Demande à Arthur de faire le café'),
     ),
+    'tg' => array(
+        $__format_help__('tg', 'VICTIM', 'Kick la victime si celle-ci a envoyé 7 messages ou plus lors des 2 dernières minutes'),
+    ),
 );
 
 // Help
