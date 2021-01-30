@@ -44,14 +44,32 @@ if ($debug === true) {
  */
 
 // Query the website and parse the HTML response
-$response = file_get_contents('https://estcequecestbientotleweekend.fr/');
-preg_match('/<p class="msg">[^<]*<\/p>/', $response, $matches);
+if (intval(date('w')) === 3) {
+    $stdout = '[SFW] C\'est mercredi ! https://i.imgur.com/IkSoidc.png :)';
+} else {
+    $response = file_get_contents('https://estcequecestbientotleweekend.fr/');
 
-$msg = count($matches) > 0 ? strip_tags($matches[0]) : '';
-$msg = trim(html_entity_decode($msg));
-$msg = str_replace('&#039;', '\'', $msg);
+    if ($debug === true) {
+        printf('[DEBUG] $response = %s' . PHP_EOL, strstr($response, "\n", true));
+    }
 
-$stdout = strlen($msg) > 0 ? $msg : NULL;
+    preg_match_all('/<p class="msg">([^<]*)<\/p>/', $response, $matches);
+    // $matches = array( 
+    //     0 => array('json'),
+    //     1 => array(json_decode($response, true)['text'])
+    // );
+
+    if ($debug === true) {
+        printf('[DEBUG] $matches = %s' . PHP_EOL, var_export($matches, true));
+    }
+
+    $msg = count($matches[1]) > 0 ? implode('', $matches[1]) : '';
+    $msg = trim(html_entity_decode($msg));
+    $msg = str_replace('&#039;', '\'', $msg);
+    $msg = preg_replace('/\s\s+/', ' ', $msg);
+
+    $stdout = strlen($msg) > 0 ? $msg : NULL;
+}
 
 // Outputs
 $stdout = empty($stdout) ? NULL : $stdout; // The message to send, if NULL the robot will remain silent
