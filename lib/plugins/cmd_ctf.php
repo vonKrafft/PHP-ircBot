@@ -141,7 +141,7 @@ if (preg_match('/^get (?P<chall_id>[0-9]+)$/i', trim($stdin), $matches)) {
         $pts_solve += ($chall->solved !== false) ? $chall->points : 0;
         $chall_solved += ($chall->solved !== false) ? 1 : 0;
     }
-    $stdout[] = sprintf('%d/%d challenge%s résolu%s | %d/%d points, %s (Pour voir un challenge : !ctf get [1-%d])',
+    $stdout[] = sprintf('%d/%d challenge%s résolu%s | %d/%d points, %s (%s)',
         $chall_solved,
         count($data->challenges),
         ($chall_solved > 1) ? 's' : '',
@@ -149,7 +149,7 @@ if (preg_match('/^get (?P<chall_id>[0-9]+)$/i', trim($stdin), $matches)) {
         $pts_solve,
         $pts_total,
         IRCColor::color(sprintf('%.2f%%', ($pts_total === 0) ? 0.0 : floatval(($pts_solve / $pts_total) * 100)), IRCColor::GREEN),
-        count($data->challenges)
+        count($data->challenges) > 0 ? sprintf('Pour voir un challenge : !ctf get [1-%d]', count($data->challenges)) : 'Aucun challenge pour l\'instant ...'
     );
 }
 
