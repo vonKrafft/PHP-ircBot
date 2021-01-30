@@ -49,7 +49,7 @@ class IRCCommand
         if (($ex = explode(' ', $message->get_content(), 2)) === false) {
             throw new UnexpectedValueException('Input "' . $message->get_content() . '" is not recognized as a command.');
         }
-        $this->bin = count($ex) > 0 ? preg_replace('/[^a-zA-Z]/', '', $ex[0]) : NULL;
+        $this->bin = count($ex) > 0 ? preg_replace('/^!/', '', $ex[0]) : NULL;
         $this->args = count($ex) > 1 ? $ex[1] : NULL;
     }
 
@@ -62,8 +62,9 @@ class IRCCommand
      */
     public function run()
     {
-        $filename = ROOT_DIR . '/lib/plugins/cmd_' . preg_replace('/[^a-zA-Z0-9_]+/', '-', $this->bin) . '.php';
-        if (file_exists($filename)) {
+        $plugin_name = preg_replace('/[^a-zA-Z0-9_]+/', '', $this->bin);
+        $filename = ROOT_DIR . '/lib/plugins/cmd_' . $plugin_name . '.php';
+        if (file_exists($filename) and $plugin_name === $this->bin) {
             // Global variable
             $source  = $this->source;  // The message received by the bot, without the command keyword
             $sender  = $this->sender;  // The sender's username

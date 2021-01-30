@@ -15,7 +15,7 @@
  * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
  * @author vonKrafft <contact@vonkrafft.fr>
- * @version 1.0.0
+ * @version 1.1.0
  *
  */
 
@@ -198,8 +198,9 @@ class Arthouur extends IRCBot
      */
     private function __on_quit($message)
     {
-        if (strpos(strtolower($message->get_content()), 'timeout') !== false) {
-            $this->login($this->get_config('nick'), $this->get_config('user'), $this->_chan);
+        if (strpos(strtolower($message->get_content()), 'timeout') !== false and $message->get_sender() === $this->get_config('nick')) {
+            $this->login($this->get_config('nick'), $this->get_config('user'), $this->_joined_channels);
+            $this->notify($message);
         }
     }
 }

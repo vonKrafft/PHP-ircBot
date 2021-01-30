@@ -105,7 +105,10 @@ abstract class IRCClient
             }
         }
         // Create socket
-        $this->_socket = fsockopen($this->get_config('server'), $this->get_config('port'));
+        $this->_socket = fsockopen($this->get_config('server'), $this->get_config('port'), $errno, $errstr);
+        if ( ! $this->_socket) {
+            throw new RuntimeException('Socket creation failed (' . $errno . '): ' . $errstr, 1);
+        }
     }
 
     /**
