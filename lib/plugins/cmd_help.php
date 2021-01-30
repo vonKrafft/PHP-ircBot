@@ -87,7 +87,7 @@ $commands_list = array(
         $__format_help__('weekend', '', 'Pour savoir si c\'est l\'heure du week-end'),
     ),
     'madame' => array(
-        $__format_help__('madame', '', '[NSFW] Donne un lien aléatoire vers une image du site "Bonjour Madame"'),
+        $__format_help__('madame', '[DATE|"top"]', '[NSFW] Donne un lien vers une image du site "Bonjour Madame", soit la plus vue, soit d\'après la date précisée, soit aléatoirement'),
     ),
     'cafe' => array(
         $__format_help__('cafe', '', 'Demande à Arthur de faire le café'),
@@ -101,6 +101,9 @@ $commands_list = array(
         $__format_help__('wisdom', 'get ID', 'Affiche la citation correspondant à l\'ID placé en argument'),
         $__format_help__('wisdom', 'add QUOTE', 'Ajoute une parole au grand livre de la sagesse (les noms peuvent être précisés entre chevrons)'),
         $__format_help__('wisdom', 'del ID', 'Supprime la citation correspondant à l\'ID placé en argument'),
+    ),
+    'stats' => array(
+        $__format_help__('stats', '', 'Dresse un bilan des commandes utilisées sur le chan IRC'),
     ),
 );
 
