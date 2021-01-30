@@ -44,7 +44,11 @@ if ($debug === true) {
 }
 
 // Immunity
-$immunity = array(strtolower(BOT_NICKNAME), strtolower(ADM_NICKNAME));
+$immunity = array(strtolower(BOT_NICKNAME));
+
+if ($debug === true) {
+    printf('[DEBUG] Immunity => %s' . PHP_EOL, implode(', ', $immunity));
+}
 
 // Kick the requested nickname
 if(($sender !== $source) and ! in_array(strtolower($victim), $immunity)) {
@@ -63,7 +67,7 @@ if(($sender !== $source) and ! in_array(strtolower($victim), $immunity)) {
     if ($flood_level > 6) {
         $action = 'KICK';
         $stdout = array($victim, 'Attention, le ' . $sender . ' des collines !');
-    } else {
+    } elseif ( ! in_array(strtolower($sender), $immunity)) {
         $action = 'KICK';
         $stdout = array($sender, 'Non mais... Que vous soyez débile c\'est une chose, mais là y a de la mauvaise volonté quand même');
     }
