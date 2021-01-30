@@ -63,7 +63,7 @@ if (count($matches) == 0) {
     if (strlen(trim($stdin)) == 0) {
         if (count($wisdom) > 0) {
             $id = array_rand($wisdom);
-            $stdout  = preg_replace('/(<[^>]+> )/', IRCColor::color('$1', IRCColor::BLUE), $wisdom[$id]['quote']);
+            $stdout  = preg_replace('/(<[^>]+>)/', IRCColor::color('$1', IRCColor::BLUE), $wisdom[$id]['quote']);
             $stdout .= IRCColor::color(' (#' . $id . ', ' . $wisdom[$id]['date'] . ')', IRCColor::GRAY);
         } else {
             $stdout = 'Le grand livre de la sagesse est introuvable !';
@@ -78,7 +78,7 @@ if (count($matches) == 0) {
     if ($debug === true) printf('[DEBUG] GET #%d' . PHP_EOL, $args);
 
     if (isset($wisdom[$args])) {
-        $stdout  = preg_replace('/(<[^>]+> )/', IRCColor::color('$1', IRCColor::BLUE), $wisdom[$args]['quote']);
+        $stdout  = preg_replace('/(<[^>]+>)/', IRCColor::color('$1', IRCColor::BLUE), $wisdom[$args]['quote']);
         $stdout .= IRCColor::color(' (#' . $args . ', ' . $wisdom[$args]['date'] . ')', IRCColor::GRAY);
     } elseif ($args > 0) {
         $stdout = 'Oui ... Mais non ... Y\'a pas de citation #' . $args . ' mon p\'tit pote !';
