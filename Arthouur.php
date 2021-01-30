@@ -119,24 +119,28 @@ class Arthouur extends IRCBot
 
         // Process command if necessary
         if (preg_match('/^!/', $message->get_content())) {
-            $cmd = new IRCCommand($message, $this->history($message->get_source()));
-            switch ($cmd->run()->response_command(self::PRIVMSG)) {
-                case self::PRIVMSG:
-                    foreach ($cmd->get_result_array(10) as $result) {
-                        $this->privmsg($cmd->reply_to($this->_joined_channels), $result);
-                    }
-                    break;
-                case self::TOPIC:
-                    $this->topic($cmd->reply_to($this->_joined_channels), $cmd->get_result());
-                    break;
-                case self::KICK:
-                    $results = $cmd->get_result_array(2);
-                    $victim = count($results) > 0 ? $results[0] : NULL;
-                    $reason = count($results) > 1 ? $results[1] : NULL;
-                    $this->kick($cmd->reply_to($this->_joined_channels), $victim, $reason);
-                    break;
-                case self::NICK:
-                    $this->nick($cmd->get_result());
+            $is_flood = $this->flood_guard($message->get_source(), $message->get_sender(), 5, 'Il commence à doucement me faire chier celui là aussi !');
+
+            if ($is_flood === false) {
+                $cmd = new IRCCommand($message, $this->history($message->get_source()));
+                switch ($cmd->run()->response_command(self::PRIVMSG)) {
+                    case self::PRIVMSG:
+                        foreach ($cmd->get_result_array(10) as $result) {
+                            $this->privmsg($cmd->reply_to($this->_joined_channels), $result);
+                        }
+                        break;
+                    case self::TOPIC:
+                        $this->topic($cmd->reply_to($this->_joined_channels), $cmd->get_result());
+                        break;
+                    case self::KICK:
+                        $results = $cmd->get_result_array(2);
+                        $victim = count($results) > 0 ? $results[0] : NULL;
+                        $reason = count($results) > 1 ? $results[1] : NULL;
+                        $this->kick($cmd->reply_to($this->_joined_channels), $victim, $reason);
+                        break;
+                    case self::NICK:
+                        $this->nick($cmd->get_result());
+                }
             }
         }
         
