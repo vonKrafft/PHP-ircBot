@@ -47,24 +47,31 @@ if ($debug === true) {
  * parmi les dialogues d'un personnage si celui-ci est précisé en argument.
  */
 
-// Use history if stdin is empty
-$stdin = (empty($stdin) and is_array($history)) ? implode(' ', $history) : $stdin;
-
 if ($debug === true) {
-    printf('[DEBUG] Input => %s' . PHP_EOL, $stdin);
+    printf('[DEBUG] INPUTS : stdin => %s' . PHP_EOL, $stdin);
+}
+
+// Use history if stdin is empty
+if (empty($stdin) and is_array($history)) {
+    $search = implode(' ', $history);
+    if ($debug === true) {
+        printf('[DEBUG] INPUTS : Use history => %s' . PHP_EOL, $search);
+    }
+} else {
+    $search = $stdin;
 }
 
 // Normalize
 $a = 'ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõöøùúûýýþÿŔŕ';
 $b = 'aaaaaaaceeeeiiiidnoooooouuuuybsaaaaaaaceeeeiiiidnoooooouuuyybyRr';
-$search = utf8_decode($stdin);                      // UTF-8 
-$search = strtr($search, utf8_decode($a), $b);      // Remove accents
-$search = strtolower($search);                      // Lowercase
-$search = preg_replace('/[^\w\s]+/', '', $search);  // Remove non-word or non-space characters
-$search = trim($search);                            // Trim spaces
+$search = utf8_decode($search);                              // UTF-8 
+$search = strtr($search, utf8_decode($a), $b);              // Remove accents
+$search = strtolower($search);                              // Lowercase
+$search = preg_replace('/[^\w\s\.*+"]+/', '', $search);    // Remove non-word or non-space characters
+$search = trim($search);                                    // Trim spaces
 
 if ($debug === true) {
-    printf('[DEBUG] Normalized input => %s' . PHP_EOL, $search);
+    printf('[DEBUG] INPUTS : Normalized input => %s' . PHP_EOL, $search);
 }
 
 // Kaamelott characters
@@ -86,7 +93,7 @@ if (in_array($character_name, $characters)) {
     $search = trim(preg_replace("/^$character_name/", '', $search));
 
     if ($debug === true) {
-        printf('[DEBUG] Requested name => %s' . PHP_EOL, $character_name);
+        printf('[DEBUG] INPUTS : Requested name => %s' . PHP_EOL, $character_name);
     }
 }
 shuffle($characters);
@@ -102,21 +109,22 @@ $searches = array(
 
 // Convert words into regular expressions
 foreach ($searches as $key => $value) {
-    $value = preg_replace('/[^\w" ]|" *"/', '', $value); // Remove quoted blanks and special chars
-    $value = preg_replace('/ *" */', '"', trim($value)); // Trim spaces around quotes
-    $value = preg_replace('/ +/', '|', $value);          // Replace space by regex divider
-    $value = preg_replace('/"/', '\b', $value);          // Replace quote by word boundary
-    $value = str_replace('||', '|', $value);             // Remove double dividers
-    $value = str_replace('\b\b', '', $value);            // Remove double word boundary
-    $searches[$key] = utf8_encode($value);               // Encode the regular expression
+    $value = preg_replace('/[^\w" ]|" *"/', '', $value);    // Remove quoted blanks and special chars
+    $value = preg_replace('/ *" */', '"', trim($value));        // Trim spaces around quotes
+    $value = preg_replace('/ +/', '|', $value);                 // Replace space by regex divider
+    $value = preg_replace('/"/', '\b', $value);                 // Replace quote by word boundary
+    $value = str_replace('||', '|', $value);                    // Remove double dividers
+    $value = str_replace('\b\b', '', $value);                   // Remove double word boundary
+    $searches[$key] = utf8_encode($value);                      // Encode the regular expression
 
     if ($debug === true) {
-        printf('[DEBUG] Regex search (%d-letter words) => %s' . PHP_EOL, $key, $value);
+        printf('[DEBUG] INPUTS : Regex search (%d-letter words) => %s' . PHP_EOL, $key, $value);
     }
 }
+$searches[8] = $search;
 
 // Search
-$len = 7;
+$len = 8;
 $quotes = array();
 while (array_key_exists($len, $searches) and empty($quotes)) {
     $current_search = $searches[$len--];
@@ -126,30 +134,53 @@ while (array_key_exists($len, $searches) and empty($quotes)) {
 	        $content = file_exists($filename) ? file_get_contents($filename) : '[]';
         	foreach (json_decode($content) as $q) {
 	            if (preg_match("/($current_search)/i", $q->slug)) {
-                    $quotes[] = IRCColor::color('<' . $q->author . '>', IRCColor::GREEN) . ' "' . $q->content . '" ' . IRCColor::color('(' . $q->saison . ', ' . $q->episode . ')', IRCColor::GRAY);
+                    $quotes[] = sprintf(
+                        '%s "%s" %s',
+                        IRCColor::color('<' . $q->author . '>', IRCColor::GREEN),
+                        $q->content,
+                        IRCColor::color('(' . $q->saison . ', ' . $q->episode . ')', IRCColor::GRAY)
+                    );
     	        }
 	        }
         }
         if ($debug === true) {
-            printf('[DEBUG] Search %d-letter words (%s) => %d' . PHP_EOL, $len+1, $current_search, count($quotes));
+            printf('[DEBUG] RESULT : Search %d-letter words (%s) => %d' . PHP_EOL, $len+1, $current_search, count($quotes));
         }
     }
 }
 
 // Empty search
-if (empty($quotes) and empty(trim($search))) {
+if (empty($quotes) and (empty($stdin) or count($characters) === 1)) {
     foreach ($characters as $character_name) {
         $filename = ROOT_DIR . '/var/quotes/' . $character_name . '.json';
         $content = file_exists($filename) ? file_get_contents($filename) : '[]';
         foreach (json_decode($content) as $q) {
-            $quotes[] = IRCColor::color('<' . $q->author . '>', IRCColor::GREEN) . ' "' . $q->content . '" ' . IRCColor::color('(' . $q->saison . ', ' . $q->episode . ')', IRCColor::GRAY);
+            $quotes[] = sprintf(
+                '%s "%s" %s',
+                IRCColor::color('<' . $q->author . '>', IRCColor::GREEN),
+                $q->content,
+                IRCColor::color('(' . $q->saison . ', ' . $q->episode . ')', IRCColor::GRAY)
+            );
         }
         if ( ! empty($quotes)) {
             break;
         }
     }
     if ($debug === true) {
-        printf('[DEBUG] Empty search => %d' . PHP_EOL, count($quotes));
+        printf('[DEBUG] RESULT : Empty search => %d' . PHP_EOL, count($quotes));
+    }
+} elseif (empty($quotes)) {
+    if (empty($search)) {
+        $quotes = array(sprintf(
+            'Hum ... Faut préciser ta recherche (%s %s)',
+            IRCColor::color('!help', IRCColor::PINK),
+            IRCColor::color('quote', IRCColor::ROYAL)
+        ));
+    } else {
+        $quotes = array(sprintf(
+            'Personne n\'a jamais dit "%s" mon p\'tit pote !', 
+            $search
+        ));
     }
 }
 
