@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -55,28 +55,28 @@ $answers = array(
 
 // Sanitize input
 $stdin = preg_replace('/[^0-9]+/', '', $stdin);
-$chall_id = (strlen($stdin) > 0) ? intval($stdin) - 1 : NULL;
+$chall_id = (strlen($stdin) > 0) ? intval($stdin) - 1 : null;
 
 if ($debug === true) {
     printf('[DEBUG] Challenge ID => %s' . PHP_EOL, $chall_id);
 }
 
 // Initialize output
-$stdout = NULL;
+$stdout = null;
 
 // Open CTF file
 $filename = ROOT_DIR . '/var/ctf/data_' . preg_replace('/[^a-z0-9]+/', '', strtolower($source)) . '.json';
-$data = file_exists($filename) ? json_decode(file_get_contents($filename)) : NULL;
+$data = file_exists($filename) ? json_decode(file_get_contents($filename)) : null;
 
 if ($debug === true) {
     printf('[DEBUG] Filename => %s' . PHP_EOL, $filename);
 }
 
 // Flag a challenge
-if ($data !== NULL) {
+if ($data !== null) {
 	if (intval($data->ctf->end) - time() < 0) {
 		$stdout = sprintf($answers['CTF_IS_OVER']);
-	} elseif ($chall_id === NULL) {
+	} elseif ($chall_id === null) {
 		$stdout = sprintf($answers['EMPTY_INDEX']);
 	} elseif ($chall_id < 0 or $chall_id >= count($data->challenges)) {
 		$stdout = sprintf($answers['OUT_OF_BOUND'], $chall_id+1);
@@ -95,11 +95,11 @@ if ($data !== NULL) {
 }
 
 // Save CTF
-if ($data !== NULL) {
+if ($data !== null) {
 	file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 }
 
 // Outputs
-$stdout = empty($stdout) ? NULL : $stdout; // The message to send, if NULL the robot will remain silent
-$sendto = empty($sendto) ? NULL : $sendto; // The channel on which to send the IRC command
-$action = empty($action) ? NULL : $action; // The desired command (PRIVMSG if NULL)
+$stdout = empty($stdout) ? null : $stdout; // The message to send, if null the robot will remain silent
+$sendto = empty($sendto) ? null : $sendto; // The channel on which to send the IRC command
+$action = empty($action) ? null : $action; // The desired command (PRIVMSG if null)

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -51,13 +51,13 @@ if ($debug === true) {
 }
 
 // Initialize output
-$stdout = NULL;
+$stdout = null;
 
 // Help format function
-$__format_help__ = function ($command, $args, $description = NULL, $padding = 40) {
+$__format_help__ = function ($command, $args, $description = null, $padding = 40) {
     $helptext = IRCColor::color('!' . $command, IRCColor::PINK);
     $helptext .= empty(trim($args)) ? '' : ' ' . IRCColor::color($args, IRCColor::ROYAL);
-    $helptext .= ($description !== NULL) ? ' - ' . trim($description) : '';
+    $helptext .= ($description !== null) ? ' - ' . trim($description) : '';
     return $helptext;
 };
 
@@ -120,6 +120,6 @@ if (empty($stdin)) {
 }
 
 // Outputs
-$stdout = empty($stdout) ? NULL : $stdout; // The message to send, if NULL the robot will remain silent
-$sendto = empty($sendto) ? NULL : $sendto; // The channel on which to send the IRC command
-$action = empty($action) ? NULL : $action; // The desired command (PRIVMSG if NULL)
+$stdout = empty($stdout) ? null : $stdout; // The message to send, if null the robot will remain silent
+$sendto = empty($sendto) ? null : $sendto; // The channel on which to send the IRC command
+$action = empty($action) ? null : $action; // The desired command (PRIVMSG if null)

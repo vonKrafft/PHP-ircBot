@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -15,7 +15,7 @@
  * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
  * @author vonKrafft <contact@vonkrafft.fr>
- * @version 1.1.0
+ * @version 1.2.2
  *
  */
 
@@ -27,9 +27,9 @@ define('IRC_SERVER', 'chat.freenode.net');      // Hostname of the IRC server
 define('IRC_PORT', 6667);                       // Remote port of the IRC server
 define('IRC_CHANNELS', array());                // List of IRC channel for auto-join
 
-define('BOT_NICKNAME', 'KingArthur');           // Bot nickname
+define('BOT_NICKNAME', 'Arthouur');             // Bot nickname
 define('BOT_REALNAME', 'Le-Roi-Arthur');        // Bot name (nickname is used if empty)
-define('BOT_VERSION', '1.2.1');                 // Version of the bot
+define('BOT_VERSION', '1.2.2');                 // Version of the bot
 
 ############ DON'T EDIT CODE BELLOW IF YOU DON'T KNOW WHAT YOU DO ############
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -63,14 +63,14 @@ $stdout = array();
 
 // Open CTF file
 $filename = 'var/ctf/data_' . preg_replace('/[^a-z0-9]+/', '', strtolower($source)) . '.json';
-$data = file_exists($filename) ? json_decode(file_get_contents($filename)) : NULL;
+$data = file_exists($filename) ? json_decode(file_get_contents($filename)) : null;
 
 if ($debug === true) {
     printf('[DEBUG] Filename => %s' . PHP_EOL, $filename);
 }
 
 // Retrieve CTF data
-if ($data !== NULL) {
+if ($data !== null) {
     $begin = intval($data->ctf->begin) - time();
     $end = intval($data->ctf->end) - time();
     $remaining = ($begin > 0) ? $begin : $end;
@@ -154,7 +154,7 @@ if (preg_match('/^get (?P<chall_id>[0-9]+)$/i', trim($stdin), $matches)) {
 }
 
 // If there is only one row in stdout, it's mean the arguments are invalid
-if ($data !== NULL and count($stdout) == 1) {
+if ($data !== null and count($stdout) == 1) {
     $stdout[] = 'J\'comprend pas ... Essaye donc !ctf [get ID|category NAME] [solved|unsolved]';
 }
 
@@ -167,11 +167,11 @@ if (count($stdout) > ($flood_limit + 1)) {
 }
 
 // If there is no CTF for the current channel
-if ($data === NULL) {
+if ($data === null) {
 	$stdout = 'Oui ... Mais non ... Y\'a pas de CTF mon p\'tit pote !';
 }
 
 // Outputs
-$stdout = empty($stdout) ? NULL : $stdout; // The message to send, if NULL the robot will remain silent
-$sendto = empty($sendto) ? NULL : $sendto; // The channel on which to send the IRC command
-$action = empty($action) ? NULL : $action; // The desired command (PRIVMSG if NULL)
+$stdout = empty($stdout) ? null : $stdout; // The message to send, if null the robot will remain silent
+$sendto = empty($sendto) ? null : $sendto; // The channel on which to send the IRC command
+$action = empty($action) ? null : $action; // The desired command (PRIVMSG if null)

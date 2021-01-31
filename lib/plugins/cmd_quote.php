@@ -24,7 +24,7 @@ if ( ! defined('ROOT_DIR')) {
 }
 
 // Debug variable: use `if ($debug === true) { ... }` to print any data in stdout
-$debug = false;
+$debug = true;
 
 // Initialize inputs
 $stdin   = isset($stdin)   ? $stdin   : '';      // The message received by the bot, without the command keyword
@@ -58,7 +58,7 @@ if (empty($stdin) and is_array($history)) {
         printf('[DEBUG] INPUTS : Use history => %s' . PHP_EOL, $search);
     }
 } else {
-    $search = $stdin;
+    $search = preg_replace('/^ +$/', '.*', $stdin);
 }
 
 // Normalize
@@ -185,9 +185,9 @@ if (empty($quotes) and (empty($stdin) or count($characters) === 1)) {
 }
 
 // Random quote among the results
-$stdout = empty($quotes) ? NULL : $quotes[array_rand($quotes)];
+$stdout = empty($quotes) ? null : $quotes[array_rand($quotes)];
 
 // Outputs
-$stdout = empty($stdout) ? NULL : $stdout; // The message to send, if NULL the robot will remain silent
-$sendto = empty($sendto) ? NULL : $sendto; // The channel on which to send the IRC command
-$action = empty($action) ? NULL : $action; // The desired command (PRIVMSG if NULL)
+$stdout = empty($stdout) ? null : $stdout; // The message to send, if null the robot will remain silent
+$sendto = empty($sendto) ? null : $sendto; // The channel on which to send the IRC command
+$action = empty($action) ? null : $action; // The desired command (PRIVMSG if null)

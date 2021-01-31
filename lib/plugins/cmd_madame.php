@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -24,7 +24,7 @@ if ( ! defined('ROOT_DIR')) {
 }
 
 // Debug variable: use `if ($debug === true) { ... }` to print any data in stdout
-$debug = false;
+$debug = true;
 
 // Initialize inputs
 $stdin   = isset($stdin)   ? $stdin   : '';      // The message received by the bot, without the command keyword
@@ -37,7 +37,7 @@ if ($debug === true) {
 }
 
 // Initialize output
-$stdout = NULL;
+$stdout = null;
 
 // The oldest post was publish on 2018-12-10
 $max = intval((new DateTime())->diff(new DateTime("2018-12-10"))->format('%a')); 
@@ -123,28 +123,28 @@ if (preg_match('/^top$/i', $stdin) and count($spam) <= 2) {
     } else {
         $response = file_get_contents('http://www.bonjourmadame.fr/' . $random_date->format('Y/m/d'));
         preg_match('/<img.*wp-image.*src="(https?:\/\/[^"]+\.(?:png|jpg|jpeg|gif)(?:[?&][^="]+=[^&"]*)*)[^"]*"[^>]*>/', $response, $matches);
-        $url = count($matches) > 1 ? strip_tags($matches[1]) : NULL;
+        $url = count($matches) > 1 ? strip_tags($matches[1]) : null;
 
         if ($debug === true) {
             printf('[DEBUG] URL : %s' . PHP_EOL, $url);
         }
 
         // Sort the URL
-        if ($url !== NULL) {
+        if ($url !== null) {
             $response = file_get_contents('https://tinyurl.com/create.php?url=' . urlencode($url));
             preg_match('/data-clipboard-text="(https:\/\/tinyurl.com\/\w{5,})"/', $response, $matches);
-            $short_url = count($matches) > 1 ? strip_tags($matches[1]) : NULL;
+            $short_url = count($matches) > 1 ? strip_tags($matches[1]) : null;
         }
 
         // Add short URL if exist
-        if ($short_url !== NULL) {
+        if ($short_url !== null) {
             $selected_madame = array( 'link' => $short_url, 'counter' => 1 );
             $madames[$selected_date] = $selected_madame;
         }
     }
 
     // Build the IRC response
-    if ($selected_madame !== NULL) {
+    if ($selected_madame !== null) {
         $stdout = '[NSFW] ' . strip_tags($selected_madame['link']) . IRCColor::color(' (' . $selected_date . ', vue ' . $selected_madame['counter'] . ' fois)', IRCColor::GRAY);
         if ($debug === true) {
             printf('[DEBUG] Shorted URL : %s' . PHP_EOL, $selected_madame['link']);
@@ -163,6 +163,6 @@ if (preg_match('/^top$/i', $stdin) and count($spam) <= 2) {
 }
 
 // Outputs
-$stdout = empty($stdout) ? NULL : $stdout; // The message to send, if NULL the robot will remain silent
-$sendto = empty($sendto) ? NULL : $sendto; // The channel on which to send the IRC command
-$action = empty($action) ? NULL : $action; // The desired command (PRIVMSG if NULL)
+$stdout = empty($stdout) ? null : $stdout; // The message to send, if null the robot will remain silent
+$sendto = empty($sendto) ? null : $sendto; // The channel on which to send the IRC command
+$action = empty($action) ? null : $action; // The desired command (PRIVMSG if null)
