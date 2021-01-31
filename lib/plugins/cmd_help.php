@@ -105,6 +105,9 @@ $commands_list = array(
     'stats' => array(
         $__format_help__('stats', '', 'Dresse un bilan des commandes utilisées sur le chan IRC'),
     ),
+    'joke' => array(
+        $__format_help__('joke', '[ID|CATEGORY]', 'Une blague, en anglais, depuis le site https://v2.jokeapi.dev/'),
+    ),
 );
 
 // Help
