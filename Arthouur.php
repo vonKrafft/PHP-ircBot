@@ -15,7 +15,7 @@
  * WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
  * @author vonKrafft <contact@vonkrafft.fr>
- * @version 1.2.2
+ * @version 1.3.0
  *
  */
 
@@ -25,11 +25,11 @@ define('ADM_NICKNAME', 'vonKrafft'); // The administrator's nickname (leave empt
 
 define('IRC_SERVER', 'chat.freenode.net');              // Hostname of the IRC server
 define('IRC_PORT', 8000);                               // Remote port of the IRC server
-define('IRC_CHANNELS', array('#1bfaa71c'));   // List of IRC channel for auto-join
+define('IRC_CHANNELS', array());                        // List of IRC channel for auto-join
 
-define('BOT_NICKNAME', 'Arthouur');             // Bot nickname
+define('BOT_NICKNAME', 'Arthouur');                     // Bot nickname
 define('BOT_REALNAME', 'Le-Roi-Arthur');                // Bot name (nickname is used if empty)
-define('BOT_VERSION', '1.2.2');                 // Version of the bot
+define('BOT_VERSION', '1.3.0');                         // Version of the bot
 
 ############ DON'T EDIT CODE BELLOW IF YOU DON'T KNOW WHAT YOU DO ############
 
