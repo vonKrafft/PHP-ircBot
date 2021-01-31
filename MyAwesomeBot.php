@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -75,17 +75,18 @@ class MyAwesomeBot extends IRCBot
      *
      * @param mixed[]
      */
-    function __construct($admin, $config = array())
-    {
-        parent::__construct($admin, $config);
+    function __construct() {
+        parent::__construct(ADM_NICKNAME);
+        $this->connect(IRC_SERVER, IRC_PORT);
+        $this->login(BOT_NICKNAME, BOT_REALNAME, BOT_VERSION);
+        $this->join(IRC_CHANNELS);
     }
 
     /**
      * This is the workhorse function, grabs messages from the IRC server, 
      * processes them if needed, and returns a result
      */
-    public function loop()
-    {
+    public function loop() : void {
         if ($this->_socket === NULL) {
             throw new ErrorException('Socket is not initialized!', 1);
         }
@@ -99,39 +100,38 @@ class MyAwesomeBot extends IRCBot
             case self::INVITE:  $this->__on_invite($message);   break;
             case self::KICK:    $this->__on_kick($message);     break;
             case self::QUIT:    $this->__on_quit($message);     break;
-            default:            $this->log($message);           break;
+            default:            $this->log($message, ':::');    break;
         }
     }
 
     /**
      * Process a private message.
-     *
-     * @param IRCMessage
      */
-    private function __on_privmsg($message)
-    {
+    private function __on_privmsg(object $message) : void {
         $this->log($message);
 
         // Process command if necessary
         if (preg_match('/^!/', $message->get_content())) {
-            $cmd = new IRCCommand($message, $this->history($message->get_source()));
-            switch ($cmd->run()->response_command(self::PRIVMSG)) {
-                case self::PRIVMSG:
-                    foreach ($cmd->get_result_array(10) as $result) {
-                        $this->privmsg($cmd->reply_to($this->_joined_channels), $result);
-                    }
-                    break;
+            $cmd = new IRCCommand($message, $this->get_history($message->get_source()));
+            switch ($cmd->run()->response_command()) {
                 case self::TOPIC:
-                    $this->topic($cmd->reply_to($this->_joined_channels), $cmd->get_result());
+                    $this->topic($cmd->reply_to($this->_chanlist), $cmd->get_result());
                     break;
                 case self::KICK:
                     $results = $cmd->get_result_array(2);
                     $victim = count($results) > 0 ? $results[0] : NULL;
                     $reason = count($results) > 1 ? $results[1] : NULL;
-                    $this->kick($cmd->reply_to($this->_joined_channels), $victim, $reason);
+                    $this->kick($cmd->reply_to($this->_chanlist), $victim, $reason);
                     break;
                 case self::NICK:
                     $this->nick($cmd->get_result());
+                    break;
+                case self::PRIVMSG:
+                default:
+                    foreach ($cmd->get_result_array(10) as $result) {
+                        $this->privmsg($cmd->reply_to($this->_chanlist), $result);
+                    }
+                    break;
             }
         }
         
@@ -142,7 +142,7 @@ class MyAwesomeBot extends IRCBot
 
         // Default behavior
         else {
-            $this->history($message->get_source(), $message->get_content());
+            $this->add_history_event($message->get_source(), $message->get_content());
         }
     }
 
@@ -166,9 +166,10 @@ class MyAwesomeBot extends IRCBot
     {
         $this->log($message);
         if ($message->get_sender() === $this->_admin or empty($this->_admin)) {
-            $this->chan(self::JOIN, $message->get_content());
+            $this->append_chan($message->get_content());
+            $this->join($message->get_content());
+            $this->notify($message);
         }
-        $this->notify($message);
     }
 
     /**
@@ -181,7 +182,7 @@ class MyAwesomeBot extends IRCBot
     {
         $this->log($message);
         if ($message->get_content() === $this->get_config('nickname')) {
-            $this->chan(self::QUIT, $message->get_source());
+            $this->remove_chan($message->get_source());
             $this->notify($message);
         }
     }
@@ -193,23 +194,13 @@ class MyAwesomeBot extends IRCBot
      */
     private function __on_quit($message)
     {
-        if (strpos(strtolower($message->get_content()), 'timeout') !== false) {
-            $this->login($this->get_config('nick'), $this->get_config('user'), $this->_chan);
+        if (strpos(strtolower($message->get_content()), 'timeout') !== false and $message->get_sender() === $this->get_config('nick')) {
+            $this->login($this->get_config('nick'), $this->get_config('user'), $this->_chanlist);
+            $this->notify($message);
         }
     }
 }
 
 // Create the bot
-$bot = new MyAwesomeBot(ADM_NICKNAME, array(
-    'server'   => IRC_SERVER,
-    'port'     => IRC_PORT,
-    'channels' => IRC_CHANNELS,
-    'nickname' => BOT_NICKNAME,
-    'realname' => BOT_REALNAME,
-    'version'  => BOT_VERSION,
-));
-
-// Loop
-while (true) {
-    $bot->loop();
-}
+$bot = new Arthouur();
+while (true) { $bot->loop(); }

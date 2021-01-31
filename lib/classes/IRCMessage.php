@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -53,7 +53,7 @@ if ( ! defined('ROOT_DIR')) {
  */
 class IRCMessage
 {
-    protected $regex = '/^(?::(?<prefix>(?P<servername>[\w.:-]+)|(?P<nick>[a-zA-Z][a-zA-Z0-9_\[\]\\\\`^\{\}-]*)(?:!(?P<user>[^\s@]+))?(?:@(?P<host>[\w.:-]+))?) +)?(?<command>[a-zA-Z]+|[0-9]{3})(?P<params> +(?:(?P<middle>[^\s:][^\s]*) +)?[^:]*(?::(?P<trailing>[^\n\r]*))?)$/';
+    protected $regex = '/^(?::(?<prefix>(?P<servername>[\w.:-]+)|(?P<nick>[a-zA-Z][a-zA-Z0-9_\[\]\\\\`^\{\}-]*)(?:!(?P<user>[^\s@]+))?(?:@(?P<host>[\w.:\/-]+))?) +)?(?<command>[a-zA-Z]+|[0-9]{3})(?P<params> +(?:(?P<middle>[^\s:][^\s]*) +)?[^:]*(?::(?P<trailing>[^\n\r]*))?)$/';
 
     // <message>     ::= [':' <prefix> <SPACE> ] <command> <params> <crlf>
     public $message    = NULL;
@@ -79,10 +79,8 @@ class IRCMessage
     
     /**
      * Construct item, parse input string
-     * @param string
      */
-    function __construct($message = '')
-    {
+    function __construct(string $message = '') {
         preg_match($this->regex, $message, $matches);
         $this->message    = $message;
         $this->prefix     = array_key_exists('prefix'    , $matches) ? $matches['prefix']     : NULL;
@@ -96,28 +94,23 @@ class IRCMessage
         $this->trailing   = array_key_exists('trailing'  , $matches) ? $matches['trailing']   : NULL;
     }
 
-    public function __tostring()
-    {
+    public function __tostring() : string {
         return $this->message;
     }
 
-    public function get_source()
-    {
+    public function get_source() : string {
         return preg_match('/^#/', $this->middle) ? $this->middle : $this->nick;
     }
 
-    public function get_sender()
-    {
+    public function get_sender() : string {
         return $this->nick;
     }
 
-    public function get_content()
-    {
+    public function get_content() : string {
         return $this->trailing;
     }
 
-    public function set_content($message)
-    {
+    public function set_content(string $message) : object {
         $this->trailing = $message;
         return $this;
     }

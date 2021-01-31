@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -17,7 +17,7 @@
 
 // Prevent direct access
 if ( ! defined('ROOT_DIR')) {
-	die('Direct access not permitted!');
+    die('Direct access not permitted!');
 }
 
 /**
@@ -76,37 +76,13 @@ abstract class IRCClient
     const PONG     = 'PONG';
     const ERROR    = 'ERROR';
 
-    // This is going to hold the TCP/IP connection
-    protected $_socket = NULL;
-
-    // Configuration
-    protected $_config = array();
-
     /**
-     * Construct item, opens the server connection
-     * @param mixed[]
+     * Construct the IRC client
      */
-    function __construct($config = array())
-    {
-        // Init configurations properties
-        $this->_config = array(
-            'server'   => filter_var($config['server'], FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME),
-            'port'     => filter_var($config['port'], FILTER_VALIDATE_INT, array('options' => array('default' => 6667, 'min_range' => 0, 'max_range' => 65535))),
-            'channels' => is_array($config['channels']) ? $config['channels'] : array(),
-            'nickname' => preg_match('/^[a-zA-Z][a-zA-Z0-9_\[\]\\\\`^\{\}-]*$/', $config['nickname']) ? $config['nickname'] : false,
-            'realname' => preg_match('/^[^\s@]+$/', $config['realname']) ? $config['realname'] : $config['nickname'],
-            'version'  => array_key_exists('version', $config) ? $config['version'] : '1.0.0',
-        );
-        // Check config
-        foreach ($this->_config as $key => $value) {
-            if ($value === false) {
-                $v = array_key_exists($key, $config) ? $config[$key] : 'NULL';
-                throw new UnexpectedValueException('Invalid configuration: ' . $key . ' => ' . $v, 1);
-            }
-        }
-        // Create socket
-        $this->_socket = fsockopen($this->get_config('server'), $this->get_config('port'));
-    }
+    public function __construct(
+        protected array $_config = array(),
+        protected mixed $_socket = false,
+    ) { }
 
     /**
      * This is the workhorse function, grabs messages from the IRC server, 
@@ -115,79 +91,81 @@ abstract class IRCClient
     abstract protected function loop();
 
     /**
-     * Log received or sent messages
-     *
-     * @param string
-     * @param bool
-     * @return int|bool
+     * Get configuration property.
      */
-    protected function log($message, $sent = false)
-    {
-    	$message = strval($message);
-        if (strlen($message) > 0) {
-            $line = sprintf('[%s] %s %s' . PHP_EOL, date('Y-m-d H:i:s'), ($sent ? '>>>' : '<<<'), $message);
-            printf('%s', $line); // Print to stdout
-            $filename = preg_replace('/[^a-z0-9_]+/', '', strtolower($this->get_config('nickname', 'phpbot'))) . '_' . date('y\wW') . '.log';
-            return file_put_contents(ROOT_DIR . '/var/log/' . $filename, $line, FILE_APPEND);
+    public function __get(string $property) : mixed {
+        return array_key_exists($property, $this->_config) ? $this->_config[$property] : null;
+    }
+
+    /**
+     * Set all configuration properties.
+     */
+    public function __set(string $property, mixed $value) : void {
+        if ($property === 'server' and filter_var($value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME)) {
+            $this->_config['server'] = filter_var($value, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME);
+        } elseif ($property === 'port' and filter_var($value, FILTER_VALIDATE_INT, array('options' => array('default' => 6667, 'min_range' => 0, 'max_range' => 65535)))) {
+            $this->_config['port'] = filter_var($value, FILTER_VALIDATE_INT, array('options' => array('default' => 6667, 'min_range' => 0, 'max_range' => 65535)));
+        } elseif ($property === 'channels' and is_array($value)) {
+            $this->_config['channels'] = $value;
+        } elseif ($property === 'nickname' and preg_match('/^[a-zA-Z][a-zA-Z0-9_\[\]\\\\`^\{\}-]*$/', $value)) {
+            $this->_config['nickname'] = $value;
+        } elseif ($property === 'realname' and preg_match('/^[^\s@]+$/', $value)) {
+            $this->_config['realname'] = $value;
+        } elseif ($property === 'version' and preg_match('/^[0-9]\.[0-9]\.[0-9](-[a-z0-9_-]+)?$/', $value)) {
+            $this->_config['version'] = $value;
+        } else {
+            throw new UnexpectedValueException('Invalid configuration: ' . $property . ' => ' . $value, 1);
         }
-        return 0;
     }
 
     /**
-     * Get configuration property by key
-     * @param string
-     * @param mixed
-     * @return mixed
+     * Log received or sent messages.
      */
-    protected function get_config($key, $default = NULL)
-    {
-    	return array_key_exists($key, $this->_config) ? $this->_config[$key] : $default;
+    public function log(string $message, string $prefix = '>>>') : int|bool {
+        if (strlen($message) > 0) {
+            $row = sprintf('[%s] %s %s' . PHP_EOL, date('Y-m-d H:i:s'), $prefix, $message);
+            $botname = strtolower($this->nickname ? $this->nickname : 'phpbot');
+            printf('<%s> %s', $botname, $row); // Print to stdout
+            $filename = preg_replace('/[^a-z0-9_]+/', '', $botname) . '_' . date('y\wW') . '.log';
+            return file_put_contents(ROOT_DIR . '/var/log/' . $filename, $row, FILE_APPEND);
+        }
+        return false;
     }
 
     /**
-     * Set all configuration properties
-     * @param string
-     * @param mixed
-     * @return mixed[]
+     * Display stuff to the broswer and send data to the server.
      */
-    protected function set_config($key, $value)
-    {
-    	$this->_config[$key] = $value;
-    	return $this->_config;
-    }
-
-    /**
-     * Displays stuff to the broswer and sends data to the server.
-     *
-     * @param string
-     * @param string
-     * @param bool
-     * @return IRCClient
-     */
-    protected function send_data($cmd, $params = NULL, $logged = false)
-    {
-    	if ($this->_socket !== NULL) {
-	        if ($params === NULL) {
-	            fputs($this->_socket, $cmd . "\r\n");
-	            if ($logged === true) $this->log($cmd, true);
-	        } else {
-	            fputs($this->_socket, $cmd . ' ' . $params . "\r\n");
-	            if ($logged === true) $this->log($cmd . ' ' . $params, true);
-	        }
+    private function __send_data(string $cmd, ?string $args = null, bool $log = false) : object {
+        if ($this->_socket !== null) {
+            $data = ($args === null) ? $cmd : $cmd . ' ' . $args;
+            fputs($this->_socket, $data . "\r\n");
+            if ($log) $this->log($data, '<<<');
         }
         return $this;
     }
 
     /**
-     * Logs the client in on the server
-     *
-     * @param string
-     * @param string
-     * @return IRCClient
+     * Set server/port and create the socket
      */
-    protected function login($nickname, $realname) {
-        $this->user($nickname, $realname, 8);
-        $this->nick($nickname);
+    protected function connect(string $server, int $port = 6667) : object {
+        $this->server = $server;
+        $this->port = $port;
+        $this->_socket = fsockopen($this->server, $this->port, $errno, $errstr);
+        if ( ! $this->_socket) {
+            throw new RuntimeException('Socket creation failed (' . $errno . '): ' . $errstr, 1);
+        }
+        return $this;
+    }
+
+    /**
+     * Sets nickname/realname and logs in the client to the server
+     */
+    protected function login(string $nickname, ?string $realname = null, string $version = '1.0.0') : object {
+        $this->nickname = $nickname;
+        $this->realname = $realname;
+        $this->version = $version;
+        $this->user($this->nickname, $this->realname, 8);
+        $this->nick($this->nickname);
         return $this;
     }
 
@@ -201,19 +179,14 @@ abstract class IRCClient
      *                 ; if the bit 3 is set, the user mode 'i' will be set
      *
      * @see https://tools.ietf.org/html/rfc2812#section-3.1.3
-     * @param string
-     * @param string
-     * @param int
-     * @return IRCClient
      */
-    protected function user($user, $realname = NULL, $mode = 0)
-    {
-        $user = preg_match('/^[^\s,@]+(,[^\s,@]+)*$/', strval($user)) ? strval($user) : NULL;
+    protected function user(?string $user, ?string $realname = null, int $mode = 0) : object {
+        $user = preg_match('/^[^\s,@]+(,[^\s,@]+)*$/', strval($user)) ? strval($user) : null;
         $mode = preg_match('/^(0|4|8|12)$/', strval($mode)) ? strval($mode) : '0';
         if (isset($user, $realname, $mode)) {
-        	$this->send_data(self::USER, $user . ' ' . $mode . ' * :' . $realname, true);
+            $this->__send_data(self::USER, $user . ' ' . $mode . ' * :' . $realname, true);
         } elseif (isset($user, $mode)) {
-        	$this->send_data(self::USER, $user . ' ' . $mode . ' * :' . $user, true);
+            $this->__send_data(self::USER, $user . ' ' . $mode . ' * :' . $user, true);
         }
         return $this;
     }
@@ -224,14 +197,11 @@ abstract class IRCClient
      * nickname   =  ( letter / special ) *8( letter / digit / special / "-" )
      *
      * @see https://tools.ietf.org/html/rfc2812#section-3.1.2
-     * @param string
-     * @return IRCClient
      */
-    protected function nick($nickname)
-    {
-        $nickname = preg_match('/^[a-z\x5B-\x60\x7B-\x7D]\w*$/i', strval($nickname)) ? strval($nickname) : NULL;
+    protected function nick(?string $nickname) : object {
+        $nickname = preg_match('/^[a-z\x5B-\x60\x7B-\x7D]\w*$/i', strval($nickname)) ? strval($nickname) : null;
         if (isset($nickname)) {
-            $this->send_data(self::NICK, $nickname, true);
+            $this->__send_data(self::NICK, $nickname, true);
         }
         return $this;
     }
@@ -248,19 +218,16 @@ abstract class IRCClient
      *                 ; except NUL, CR, LF, FF, h/v TABs, and " "
      *
      * @see https://tools.ietf.org/html/rfc2812#section-3.2.1
-     * @param string|array
-     * @return IRCClient
      */
-    protected function join($channels, $keys = array())
-    {
+    protected function join(string|array|null $channels, string|array|null $keys = array()) : object {
         $channels = is_array($channels) ? implode(',', $channels) : strval($channels);
-        $channels = preg_match('/^[#&+][^\s,:]+(,[#&+][^\s,:]+)*$/', $channels) ? $channels : NULL;
+        $channels = preg_match('/^[#&+][^\s,:]+(,[#&+][^\s,:]+)*$/', $channels) ? $channels : null;
         $keys     = is_array($keys) ? implode(',', $keys) : strval($keys);
-        $keys     = preg_match('/^[^\s,]{1,23}(,[^\s,]{1,23})*$/', $keys) ? $keys : NULL;
+        $keys     = preg_match('/^[^\s,]{1,23}(,[^\s,]{1,23})*$/', $keys) ? $keys : null;
         if (isset($channels, $keys)) {
-            $this->send_data(self::JOIN, $channels . ' ' . $keys, true);
+            $this->__send_data(self::JOIN, $channels . ' ' . $keys, true);
         } elseif (isset($channels)) {
-            $this->send_data(self::JOIN, $channels, true);
+            $this->__send_data(self::JOIN, $channels, true);
         }
         return $this;
     }
@@ -272,15 +239,13 @@ abstract class IRCClient
      * shortname  =  ( letter / digit ) *( letter / digit / "-" )
      *                 ; as specified in RFC 1123 [HNAME]
      *
-     * @param string 
-     * @return IRCClient
+     * @see https://tools.ietf.org/html/rfc2812#section-3.7.3
      */
-    protected function pong($server)
-    {
+    protected function pong(?string $server) : object {
         $server = preg_replace('/^:/', '', strval($server));
-        $server = preg_match('/^[a-z0-9][a-z0-9-]*(.[a-z0-9][a-z0-9-]*)*$/i', strval($server)) ? strval($server) : NULL;
+        $server = preg_match('/^[a-z0-9][a-z0-9-]*(.[a-z0-9][a-z0-9-]*)*$/i', strval($server)) ? strval($server) : null;
         if (isset($server)) {
-            $this->send_data(self::PONG, ':' . $server);
+            $this->__send_data(self::PONG, ':' . $server);
         }
         return $this;
     }
@@ -297,16 +262,12 @@ abstract class IRCClient
      * nickname   =  ( letter / special ) *8( letter / digit / special / "-" )
      *
      * @see https://tools.ietf.org/html/rfc2812#section-3.3.1
-     * @param string
-     * @param string
-     * @return IRCClient
      */
-    protected function privmsg($msgtarget, $text)
-    {
+    protected function privmsg(?string $msgtarget, ?string $text) : object {
         $msgtarget = is_array($msgtarget) ? implode(',', $msgtarget) : strval($msgtarget);
-        $msgtarget = preg_match('/^([#&+][^\s,:]+|[a-z\x5B-\x60\x7B-\x7D]\w*)(,([#&+][^\s,:]+|[a-z\x5B-\x60\x7B-\x7D]\w*))*$/i', $msgtarget) ? $msgtarget : NULL;
-        if (isset($msgtarget)) {
-            $this->send_data(self::PRIVMSG, $msgtarget . ' :' . strval($text), true);
+        $msgtarget = preg_match('/^([#&+][^\s,:]+|[a-z\x5B-\x60\x7B-\x7D]\w*)(,([#&+][^\s,:]+|[a-z\x5B-\x60\x7B-\x7D]\w*))*$/i', $msgtarget) ? $msgtarget : null;
+        if (isset($msgtarget, $text)) {
+            $this->__send_data(self::PRIVMSG, $msgtarget . ' :' . strval($text), true);
         }
         return $this;
     }
@@ -320,17 +281,13 @@ abstract class IRCClient
      *                 ; any octet except NUL, BELL, CR, LF, " ", "," and ":"
      *
      * @see https://tools.ietf.org/html/rfc2812#section-3.2.4
-     * @param string
-     * @param string
-     * @return IRCClient
      */
-    protected function topic($channel, $topic = NULL)
-    {
-        $channel = preg_match('/^[#&+][^\s,:]+$/', strval($channel)) ? strval($channel) : NULL;
+    protected function topic(?string $channel, ?string $topic = null) : object {
+        $channel = preg_match('/^[#&+][^\s,:]+$/', strval($channel)) ? strval($channel) : null;
         if (isset($channel, $topic)) {
-            $this->send_data(self::TOPIC, $channel .  ' :' . strval($topic), true);
+            $this->__send_data(self::TOPIC, $channel .  ' :' . strval($topic), true);
         } elseif (isset($channel)) {
-            $this->send_data(self::TOPIC, $channel, true);
+            $this->__send_data(self::TOPIC, $channel, true);
         }
         return $this;
     }
@@ -346,20 +303,25 @@ abstract class IRCClient
      *                 ; any octet except NUL, CR, LF, " " and "@"
      *
      * @see https://tools.ietf.org/html/rfc2812#section-3.2.8
-     * @param string
-     * @param string
-     * @param string
-     * @return IRCbot
      */
-    protected function kick($channel, $user, $comment = NULL)
-    {
-        $channel = preg_match('/^[#&+][^\s,:]+(,[#&+][^\s,:]+)*$/', strval($channel)) ? strval($channel) : NULL;
-        $user    = preg_match('/^[^\s,@]+(,[^\s,@]+)*$/', strval($user)) ? strval($user) : NULL;
+    protected function kick(?string $channel, ?string $user, ?string $comment = null) : object {
+        $channel = preg_match('/^[#&+][^\s,:]+(,[#&+][^\s,:]+)*$/', strval($channel)) ? strval($channel) : null;
+        $user    = preg_match('/^[^\s,@]+(,[^\s,@]+)*$/', strval($user)) ? strval($user) : null;
         if (isset($channel, $user, $comment)) {
-            $this->send_data(self::KICK, $channel . ' ' . $user . ' :' . $comment, true);
+            $this->__send_data(self::KICK, $channel . ' ' . $user . ' :' . $comment, true);
         } elseif (isset($channel, $user)) {
-            $this->send_data(self::KICK, $channel . ' ' . $user . ' :' . $user, true);
+            $this->__send_data(self::KICK, $channel . ' ' . $user . ' :' . $user, true);
         }
         return $this;
+    }
+
+    /**
+     * Get version.
+     */
+    protected function version() : string {
+        $name = empty($this->_config['realname']) ? 'PHP IRCBot' : $this->_config['realname'];
+        $version = empty($this->_config['version']) ? '' : ' v' . $this->_config['version'];
+        $url = ' (https://github.com/vonKrafft/PHP-ircBot)';
+        return $name . $version . $url . ' - PHP v' . phpversion();
     }
 }

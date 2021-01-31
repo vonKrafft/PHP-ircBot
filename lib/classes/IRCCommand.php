@@ -26,31 +26,24 @@ if ( ! defined('ROOT_DIR')) {
  */
 class IRCCommand
 {
-    private $source = NULL;
-    private $sender = NULL;
-    private $history = array();
-    private $bin = NULL;
-    private $args = NULL;
-    private $result = NULL;
-    private $sendto = NULL;
-    private $action = NULL;
+    private $bin = null;
+    private $args = null;
+    private $result = null;
+    private $sendto = null;
+    private $action = null;
     
     /**
-     * Construct item, parse message
-     * @param IRCMessage
-     * @param string[]
-     * @param string
+     * Construct the IRC command
      */
-    function __construct($message = '', $history = array())
-    {
-        $this->source = $message->get_source();
-        $this->sender = $message->get_sender();
-        $this->history = is_array($history) ? $history : array();
-        if (($ex = explode(' ', $message->get_content(), 2)) === false) {
+    function __construct(
+        protected object $message, 
+        protected array $history = array()
+    ) {
+        if ( ! preg_match('/^!(?<bin>[a-z]+)(?: (?<args>.*))?$/', $message->get_content(), $matches)) {
             throw new UnexpectedValueException('Input "' . $message->get_content() . '" is not recognized as a command.');
         }
-        $this->bin = count($ex) > 0 ? preg_replace('/[^a-zA-Z]/', '', $ex[0]) : NULL;
-        $this->args = count($ex) > 1 ? $ex[1] : NULL;
+        $this->bin = $matches['bin'];
+        $this->args = array_key_exists('args', $matches) ? $matches['args'] : '';
     }
 
     /**
@@ -62,62 +55,52 @@ class IRCCommand
      */
     public function run()
     {
-        $filename = ROOT_DIR . '/lib/plugins/cmd_' . preg_replace('/[^a-zA-Z0-9_]+/', '-', $this->bin) . '.php';
-        if (file_exists($filename)) {
+        $plugin_name = preg_replace('/[^a-zA-Z0-9_]+/', '', $this->bin);
+        $filename = ROOT_DIR . '/lib/plugins/cmd_' . $plugin_name . '.php';
+        if (file_exists($filename) and $plugin_name === $this->bin) {
             // Global variable
-            $source  = $this->source;  // The message received by the bot, without the command keyword
-            $sender  = $this->sender;  // The sender's username
-            $history = $this->history; // The source channel (the sender's username in case of private message)
-            $stdin   = $this->args;    // The message history
+            $source  = $this->message->get_source();  // The source channel (the sender's username in case of private message)
+            $sender  = $this->message->get_sender();  // The sender's username
+            $history = $this->history;                // The message history
+            $stdin   = $this->args;                   // The message received by the bot, without the command keyword
             // Call external library
             include $filename;
             // Get results
-            $this->result = isset($stdout) ? $stdout : NULL; // The message to send, if NULL the robot will remain silent
-            $this->sendto = isset($sendto) ? $sendto : NULL; // The channel on which to send the IRC command
-            $this->action = isset($action) ? $action : NULL; // The desired command (PRIVMSG if NULL)
+            $this->result = isset($stdout) ? $stdout : null; // The message to send, if null the robot will remain silent
+            $this->sendto = isset($sendto) ? $sendto : null; // The channel on which to send the IRC command
+            $this->action = isset($action) ? $action : null; // The desired command (PRIVMSG if null)
         }
         return $this;
     }
 
     /**
      * Get the requested IRC operation
-     * @param string
-     * @return string
      */
-    public function response_command($default)
-    {
-        return strtoupper(($this->action !== NULL) ? $this->action : $default);
+    public function response_command() : ?string {
+        return $this->action !== null ? strtoupper($this->action) : null;
     }
 
     /**
      * Get the destination to send the result
-     * @param string
-     * @return string
      */
-    public function reply_to($allowed_channels = array())
-    {
-        return in_array($this->sendto, $allowed_channels) ? $this->sendto : $this->source;
+    public function reply_to(array $allowed_channels = array()) : string {
+        return in_array($this->sendto, $allowed_channels) ? $this->sendto : $this->message->get_source();
     }
 
     /**
      * Get the result of the execution the command.
-     * @return mixed
      */
-    public function get_result()
-    {
+    public function get_result() : mixed {
         return $this->result;
     }
 
     /**
      * Get the result of the execution the command as an array.
-     * @param int
-     * @return mixed[]
      */
-    public function get_result_array($flood_limit = 10)
-    {
+    public function get_result_array(int $flood_limit = 10) : array {
         switch (gettype($this->result)) {
             case 'array': return array_slice($this->result, 0, intval($flood_limit));
-            case 'NULL' : return array();
+            case 'null' : return array();
             default     : return array($this->result);
         }
     }

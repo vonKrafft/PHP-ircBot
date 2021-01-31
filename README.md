@@ -6,7 +6,7 @@ The bot implements an IRC client, an IRC message parser according to [RFC 1429](
 
 ## Installation
 
-First, you need to install `php >= 7.0.0` and to clone the repository.
+First, you need to install `php >= 8.0.0` and to clone the repository.
 
 ```
 $ git clone https://github.com/vonKrafft/PHP-ircBot
@@ -29,10 +29,11 @@ define('BOT_REALNAME', 'MyAwesomeBot');         // Bot name (nickname is used if
 define('BOT_VERSION', '1.0.0');                 // Version of the bot
 ```
 
-To start the IRC bot, simply run:
+To start the IRC bot, simply run it with `php` or use `docker` (https://hub.docker.com/_/php/):
 
 ```
 $ php MyAwesomeBot.php
+$ docker run -it --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp --user 1000:1000 php:8-alpine php MyAwesomeBot.php
 ```
 
 You can run multiple instances of the bot as long as you do not use a duplicate nickname on the same IRC server.
@@ -56,15 +57,15 @@ You can edit the template to make the bot do what you want:
 
 ```php
 // Do magic here ...
-$stdout = NULL;
+$stdout = null;
 ```
 
 Keep in mind that at the end of script execution, the following variables are set to be returned to the `IRCCommand` class:
 
 ```php
-$stdout = empty($stdout) ? NULL : $stdout; // The message to send, if NULL the robot will remain silent
-$sendto = empty($sendto) ? NULL : $sendto; // The channel on which to send the IRC command
-$action = empty($action) ? NULL : $action; // The desired command (PRIVMSG if NULL)
+$stdout = empty($stdout) ? null : $stdout; // The message to send, if null the robot will remain silent
+$sendto = empty($sendto) ? null : $sendto; // The channel on which to send the IRC command
+$action = empty($action) ? null : $action; // The desired command (PRIVMSG if null)
 ```
 
 ## License

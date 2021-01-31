@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -27,19 +27,19 @@ if ( ! defined('ROOT_DIR')) {
 class IRCColor
 {
     /** The control code to reset formatting **/
-    const CONTROL_NORMAL        = '0f';
+    const CTRL_NORMAL        = ''; //chr(hexdec('0f'));
     /** The control code to start or end color formatting **/
-    const CONTROL_COLOR         = '03';
+    const CTRL_COLOR         = ''; //chr(hexdec('03'));
     /** The control code to start or end bold formatting **/
-    const CONTROL_BOLD          = '02';
+    const CTRL_BOLD          = ''; //chr(hexdec('02'));
     /** The control code to start or end italic formatting **/
-    const CONTROL_ITALIC        = '1d';
+    const CTRL_ITALIC        = ''; //chr(hexdec('1d'));
     /** The control code to start or end underlining **/
-    const CONTROL_UNDERLINE     = '1f';
+    const CTRL_UNDERLINE     = ''; //chr(hexdec('1f'));
     /** The control code to start or end strikethrough formatting **/
-    const CONTROL_STRIKETHROUGH = '1e';
+    const CTRL_STRIKETHROUGH = ''; //chr(hexdec('1e'));
     /** The control code to start or end monospace formatting **/
-    const CONTROL_MONOSPACE     = '11';
+    const CTRL_MONOSPACE     = ''; //chr(hexdec('11'));
 
     const WHITE        = '00';
     const BLACK        = '01';
@@ -69,64 +69,56 @@ class IRCColor
     const SILVER       = self::LIGHT_GREY;
     const LIGHT_GRAY   = self::LIGHT_GREY;
 
-    public static function color($text, $fg, $bg = NULL) {
-        if ($bg === NULL) {
-            return chr(hexdec(self::CONTROL_COLOR)) . $fg . $text . chr(hexdec(self::CONTROL_COLOR));
-        } else {
-            return chr(hexdec(self::CONTROL_COLOR)) . $fg . ',' . $bg . $text . chr(hexdec(self::CONTROL_COLOR));
-        }
+    /**
+     * Return the text, with color IRC formatting.
+     */
+    public static function color(string $text, string $fg, ?string $bg = null) : string {
+        $color = ($bg === null) ? $fg : $fg . ',' . $bg;
+        return self::CTRL_COLOR . $color . $text . self::CTRL_COLOR;
     }
 
     /**
      * Return the text, with bold IRC formatting.
-     * @param string
-     * @return string
      */
-    public static function bold($text) {
-        return chr(hexdec(self::CONTROL_BOLD)) . $text . chr(hexdec(self::CONTROL_BOLD));
+    public static function bold(string $text) : string {
+        return self::CTRL_BOLD . $text . self::CTRL_BOLD;
     }
 
 
     /**
      * Return the text, with italic IRC formatting.
-     * @param string
-     * @return string
      */
-    public static function italic($text) {
-        return chr(hexdec(self::CONTROL_ITALIC)) . $text . chr(hexdec(self::CONTROL_ITALIC));
+    public static function italic(string $text) : string {
+        return self::CTRL_ITALIC . $text . self::CTRL_ITALIC;
     }
 
 
     /**
      * Return the text, with underline IRC formatting.
-     * @param string
-     * @return string
      */
-    public static function underline($text) {
-        return chr(hexdec(self::CONTROL_UNDERLINE)) . $text . chr(hexdec(self::CONTROL_UNDERLINE));
+    public static function underline(string $text) : string{
+        return self::CTRL_UNDERLINE . $text . self::CTRL_UNDERLINE;
     }
 
     /**
      * Return the text, with strikethrough IRC formatting.
+     * 
      * Note: This is a relatively new addition to IRC formatting conventions.
      * Use only when you can afford to have its meaning lost, as not many
      * clients support it yet.
-     * @param string
-     * @return string
      */
-    public static function strikethrough($text) {
-        return chr(hexdec(self::CONTROL_STRIKETHROUGH)) . $text . chr(hexdec(self::CONTROL_STRIKETHROUGH));
+    public static function strikethrough(string $text) : string{
+        return self::CTRL_STRIKETHROUGH . $text . self::CTRL_STRIKETHROUGH;
     }
 
     /**
      * Return the text, with monospace IRC formatting.
+     *
      * Note: This is a relatively new addition to IRC formatting conventions.
      * Use only when you can afford to have its meaning lost, as not many
      * clients support it yet.
-     * @param string
-     * @return string
      */
-    public static function monospace($text) {
-        return chr(hexdec(self::CONTROL_MONOSPACE)) . $text . chr(hexdec(self::CONTROL_MONOSPACE));
+    public static function monospace(string $text) : string {
+        return self::CTRL_MONOSPACE . $text . self::CTRL_MONOSPACE;
     }
 }
