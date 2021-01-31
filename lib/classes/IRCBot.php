@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2019 vonKrafft <contact@vonkrafft.fr>
+ * Copyright (c) 2021 vonKrafft <contact@vonkrafft.fr>
  * 
  * This file is part of PHP-ircBot (Awesome PHP Bot for IRC)
  * Source code available on https://github.com/vonKrafft/PHP-ircBot
@@ -26,129 +26,82 @@ if ( ! defined('ROOT_DIR')) {
  */
 abstract class IRCBot extends IRCClient
 {
-    // Short history of messages
-    protected $_history = array();
-
-    // Flood timestamps
-    protected $_flood = array();
-
-    // List of channels to which the bot is connected
-    protected $_joined_channels = array();
-
-    // Administrator's nickname
-    protected $_admin = NULL;
-
     /**
-     * Construct item, opens the server connection, logs the bot in
-     * @param string
-     * @param mixed[]
+     * Construct the IRC Bot
      */
-    function __construct($admin, $config = array())
-    {
-        parent::__construct($config);
-        // Init configurations properties
-        $this->_history = array();
-        $this->_flood = array();
-        $this->_joined_channels = is_array($this->get_config('channels')) ? $this->get_config('channels') : array();
-        $this->_admin = preg_replace('/[^a-zA-Z0-9_\[\]\\\\`^\{\}-]+/', '', $admin);
-        // Log in
-        $this->login($this->get_config('nickname'), $this->get_config('realname'));
-        $this->join($this->get_config('channels'));
+    public function __construct(
+        protected ?string $_admin = null,
+        protected array $_chanlist = array(),
+        protected array $_history = array(),
+        protected array $_flood = array(),
+        protected array $_config = array(),
+        protected mixed $_socket = false,
+    ) {
+        parent::__construct($this->_config, $this->_socket);
     }
 
     /**
-     * Check flood for the specified user
-     * @param string
-     * @param string
-     * @param float
-     * @param string|bool
-     * @return bool
+     * Check flood for the specified user.
      */
-    protected function flood_guard($channel, $nick, $delay = 0.5, $kick_comment = false)
-    {
-        if ($nick === $this->_admin) {
-            return false;
-        }
-        $key = $nick . '@' . $channel;
-        $previous_timestamp = array_key_exists($key, $this->_flood) ? floatval($this->_flood[$key]) : 0.0000;
-        $this->_flood[$key] = microtime(true);
-        if (abs($this->_flood[$key] - $previous_timestamp) < floatval($delay)) {
-            if (($nick !== $channel) and ($kick_comment !== false)) {
-                $this->kick($channel, $nick, $kick_comment);
-                $this->notify('KICK ' . $channel . ' ' . $nick . ' :' . $kick_comment);
+    protected function flood_guard(string $channel, string $nick, float $delay = 0.5, string|bool $kick_comment = false) : bool {
+        if ($nick !== $this->_admin) {
+            $key = $nick . '@' . $channel;
+            $previous_timestamp = array_key_exists($key, $this->_flood) ? floatval($this->_flood[$key]) : 0.0000;
+            $this->_flood[$key] = microtime(true);
+            if (abs($this->_flood[$key] - $previous_timestamp) < floatval($delay)) {
+                if (($nick !== $channel) and ($kick_comment !== false)) {
+                    $this->kick($channel, $nick, $kick_comment);
+                    $this->notify('KICK ' . $channel . ' ' . $nick . ' :' . $kick_comment);
+                }
+                return true;
             }
-            return true;
         }
         return false;
     }
 
     /**
-     * Add a new chan to the list and join it, or delete a chan from the list
-     * @param string
-     * @param string
-     * @return mixed
+     * Append a new chan to the list.
      */
-    protected function chan($action, $channel)
-    {
-        switch (strtoupper($action)) {
-            case self::JOIN:
-                if ( ! in_array($channel, $this->_joined_channels)) {
-                    $this->_joined_channels[] = $channel;
-                    $this->join($channel);
-                }
-                break;
-            case self::QUIT:
-                $this->_joined_channels = array_diff($this->_joined_channels, array($channel));
-                break;
+    protected function append_chan(string $channel) : array {
+        if ( ! in_array($channel, $this->_chanlist)) {
+            $this->_chanlist[] = $channel;
         }
-        return $this->_joined_channels;
+        return $this->_chanlist;
     }
 
     /**
-     * Get messages from history for the given source, or add a new message 
-     * to history for the given source.
-     *
-     * @param string
-     * @return string[]|NULL
+     * Delete a chan from the list.
      */
-    protected function history($source, $message = NULL)
-    {
+    protected function remove_chan(string $channel) : array {
+        $this->_chanlist = array_diff($this->_chanlist, array($channel));
+        return $this->_chanlist;
+    }
+
+    /**
+     * Add a new message to history for the given source.
+     */
+    protected function add_history_event(string $source, string $message) : array {
         $this->_history = is_array($this->_history) ? $this->_history : array();
-        if ($message !== NULL) {
-            // Add a new message to history
-            if (array_key_exists($source, $this->_history)) {
-                $this->_history[$source][] = $message;
-            } else {
-                $this->_history[$source] = array($message);
-            }
-            // Limit history size to 5 messages
-            if (count($this->_history[$source]) > 5) {
-                $this->_history[$source] = array_slice($this->_history[$source], 5);
-            }
-        }
-        return array_key_exists($source, $this->_history) ? $this->_history[$source] : NULL;
+        $this->_history[$source][] = $message;
+        $this->_history[$source] = array_slice($this->_history[$source], -5, 5);
+        return $this->_history[$source];
     }
 
     /**
-     * Notify admin
-     * @param string
-     * @return IRCBot
+     * Get messages from history for the given source.
      */
-    protected function notify($message) {
+    protected function get_history(string $source) : array {
+        $this->_history = is_array($this->_history) ? $this->_history : array();
+        return array_key_exists($source, $this->_history) ? $this->_history[$source] : array();
+    }
+
+    /**
+     * Notify the Administrator with a private query.
+     */
+    protected function notify(string $message) : object {
         if ( ! empty($this->_admin) and ! empty($message)) {
             $this->privmsg($this->_admin, $message);
         }
         return $this;
-    }
-
-    /**
-     * Get version
-     * @return string
-     */
-    protected function version() {
-        $name = empty($this->get_config('realname')) ? 'PHP IRCBot' : $this->get_config('realname');
-        $version = empty($this->get_config('version')) ? '' : ' v' . $this->get_config('version');
-        $url = ' (https://github.com/vonKrafft/PHP-ircBot)';
-        return $name . $version . $url;
     }
 }
